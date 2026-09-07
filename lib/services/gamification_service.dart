@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // ✅ স্কোরবোর্ডের জন্য ফায়ারবেস ইম্পোর্ট করা হলো
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // ✅ Auth ইম্পোর্ট করা হলো
 
 class GamificationService extends ChangeNotifier {
   GamificationService._internal();
@@ -73,15 +74,15 @@ class GamificationService extends ChangeNotifier {
       );
     }
 
-    // ✅ ম্যাজিক ট্রিক: লোকাল স্টোরেজে সেভ হওয়ার পাশাপাশি ফায়ারবেসেও স্কোর আপডেট হবে!
+    // ✅ ফিক্স: এখন আর নাম দিয়ে নয়, ইউজারের আসল UID দিয়ে ডেটা সেভ হবে!
     try {
-      final userName = prefs.getString('student_name_v2') ?? 'Learner';
-      if (userName.isNotEmpty) {
-        await FirebaseFirestore.instance.collection('users').doc(userName).set({
-          'name': userName,
-          'score': totalPoints, // আপডেট হওয়া টোটাল পয়েন্ট
+      final User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'name': user.displayName ?? 'Learner',
+          'score': totalPoints,
           'lastUpdated': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true)); // merge: true দিলে আগের ডেটা মুছে যাবে না
+        }, SetOptions(merge: true));
       }
     } catch (e) {
       debugPrint('Firebase Scoreboard Update Error: $e');
@@ -143,7 +144,6 @@ class GamificationService extends ChangeNotifier {
     lastPracticeDate = DateTime.now();
   }
 
-  // ✅ আগের এরর ফিক্স করার জন্য এই মেথডটি যোগ করা হলো
   Future<void> addPoints(int points) async {
     await addBonusPoints(points);
   }
@@ -151,7 +151,7 @@ class GamificationService extends ChangeNotifier {
   Future<void> addBonusPoints(int points) async {
     await init();
     totalPoints += points;
-    await _save(); // এটি কল হলেই এখন অটোমেটিক ফায়ারবেসে স্কোর চলে যাবে
+    await _save();
     notifyListeners();
   }
 
