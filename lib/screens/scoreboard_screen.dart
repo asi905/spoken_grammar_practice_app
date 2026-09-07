@@ -52,11 +52,9 @@ class ScoreboardScreen extends StatelessWidget {
               );
             }
 
-            // ✅ ফিক্স: শুধুমাত্র আসল ইউজারদের ফিল্টার করা হলো (যাদের নাম 'Learner' নয়)
             final users = snapshot.data!.docs.where((doc) {
               final data = doc.data() as Map<String, dynamic>;
               final name = data['name']?.toString().trim() ?? '';
-              // লগইন ছাড়া ইউজারদের নাম 'Learner' থাকে, তাই তাদের বাদ দেওয়া হচ্ছে
               return name.isNotEmpty && name.toLowerCase() != 'learner';
             }).toList();
 
@@ -86,7 +84,6 @@ class ScoreboardScreen extends StatelessWidget {
     );
   }
 
-  // ⭐ টপ ৩ জনের জন্য প্রিমিয়াম কার্ড
   Widget _buildPremiumCard(
       BuildContext context, Map<String, dynamic> userData, int index) {
     final String name = userData['name'] ?? 'Unknown User';
@@ -112,8 +109,7 @@ class ScoreboardScreen extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: () =>
-          _showUserDetails(context, userData, index + 1), // 👈 ক্লিক ইভেন্ট
+      onTap: () => _showUserDetails(context, userData, index + 1),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
@@ -195,7 +191,6 @@ class ScoreboardScreen extends StatelessWidget {
     );
   }
 
-  // 👤 বাকিদের জন্য ব্ল্যাক কার্ড
   Widget _buildBlackCard(
       BuildContext context, Map<String, dynamic> userData, int index) {
     final String name = userData['name'] ?? 'Unknown User';
@@ -211,8 +206,7 @@ class ScoreboardScreen extends StatelessWidget {
       ),
       color: Colors.black87,
       child: ListTile(
-        onTap: () =>
-            _showUserDetails(context, userData, index + 1), // 👈 ক্লিক ইভেন্ট
+        onTap: () => _showUserDetails(context, userData, index + 1),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         leading: Row(
           mainAxisSize: MainAxisSize.min,
@@ -251,7 +245,7 @@ class ScoreboardScreen extends StatelessWidget {
     );
   }
 
-  // 📊 ইউজারের বিস্তারিত দেখানোর ডায়ালগ (Bottom Sheet)
+  // 📊 ইউজারের বিস্তারিত দেখানোর ডায়ালগ (OverFlow Fix করা হয়েছে)
   void _showUserDetails(
       BuildContext context, Map<String, dynamic> userData, int rank) {
     final String name = userData['name'] ?? 'Unknown User';
@@ -261,76 +255,87 @@ class ScoreboardScreen extends StatelessWidget {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled:
+          true, // ✅ ফিক্স ১: এটি ডায়ালগকে প্রয়োজনে বেশি জায়গা নেওয়ার অনুমতি দেবে
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
-            color: Color(0xFF1A237E), // ডিপ ইন্ডিগো ব্যাকগ্রাউন্ড
-            borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black54, blurRadius: 10, offset: Offset(0, -5))
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // ছোট্ট সাদা বার
-              Container(
-                  width: 50,
-                  height: 5,
-                  decoration: BoxDecoration(
-                      color: Colors.white30,
-                      borderRadius: BorderRadius.circular(10))),
-              const SizedBox(height: 20),
-
-              // ছবি
-              CircleAvatar(
-                radius: 40,
-                backgroundColor: Colors.white,
-                child: CircleAvatar(
-                  radius: 37,
-                  backgroundColor: Colors.grey.shade800,
-                  backgroundImage:
-                      photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
-                  child: photoUrl.isEmpty
-                      ? const Icon(Icons.person, size: 40, color: Colors.white)
-                      : null,
-                ),
+        return SafeArea(
+          // ✅ ফিক্স ২: SingleChildScrollView যোগ করা হয়েছে যাতে ছোট স্ক্রিনে স্ক্রল করা যায়
+          child: SingleChildScrollView(
+            child: Container(
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 24,
+                // স্ক্রিনের নিচের সেফ এরিয়া বা কীবোর্ডের জন্য ডায়নামিক প্যাডিং
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
               ),
-              const SizedBox(height: 16),
-
-              // নাম এবং র‍্যাংক
-              Text(name,
-                  style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white)),
-              const SizedBox(height: 4),
-              Text('Rank #$rank',
-                  style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.amber)),
-              const SizedBox(height: 24),
-
-              // স্কোরের বিস্তারিত
-              _buildDetailRow(
-                  Icons.emoji_events, 'MCQ Points', '$score Pts', Colors.amber),
-              const SizedBox(height: 12),
-              _buildDetailRow(Icons.menu_book, 'Vocabulary Learned',
-                  '$vocabCount Words', Colors.greenAccent),
-              const SizedBox(height: 20),
-            ],
+              decoration: const BoxDecoration(
+                color: Color(0xFF1A237E),
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30)),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black54,
+                      blurRadius: 10,
+                      offset: Offset(0, -5))
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                      width: 50,
+                      height: 5,
+                      decoration: BoxDecoration(
+                          color: Colors.white30,
+                          borderRadius: BorderRadius.circular(10))),
+                  const SizedBox(height: 20),
+                  CircleAvatar(
+                    radius: 40,
+                    backgroundColor: Colors.white,
+                    child: CircleAvatar(
+                      radius: 37,
+                      backgroundColor: Colors.grey.shade800,
+                      backgroundImage:
+                          photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
+                      child: photoUrl.isEmpty
+                          ? const Icon(Icons.person,
+                              size: 40, color: Colors.white)
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(name,
+                      textAlign: TextAlign
+                          .center, // ✅ বড় নাম হলে সুন্দরভাবে সেন্টারে থাকবে
+                      style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
+                  const SizedBox(height: 4),
+                  Text('Rank #$rank',
+                      style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.amber)),
+                  const SizedBox(height: 24),
+                  _buildDetailRow(Icons.emoji_events, 'MCQ Points',
+                      '$score Pts', Colors.amber),
+                  const SizedBox(height: 12),
+                  _buildDetailRow(Icons.menu_book, 'Vocabulary Learned',
+                      '$vocabCount Words', Colors.greenAccent),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
           ),
         );
       },
     );
   }
 
-  // বিস্তারিত দেখানোর ছোট্ট উইজেট
   Widget _buildDetailRow(
       IconData icon, String title, String value, Color color) {
     return Container(
@@ -343,9 +348,11 @@ class ScoreboardScreen extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 28),
           const SizedBox(width: 16),
-          Text(title,
-              style: const TextStyle(fontSize: 16, color: Colors.white70)),
-          const Spacer(),
+          Expanded(
+            // ✅ এখানেও Expanded দেওয়া হলো যাতে ছোট স্ক্রিনে টেক্সট ওভারফ্লো না হয়
+            child: Text(title,
+                style: const TextStyle(fontSize: 15, color: Colors.white70)),
+          ),
           Text(value,
               style: TextStyle(
                   fontSize: 18, fontWeight: FontWeight.bold, color: color)),
