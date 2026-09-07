@@ -144,19 +144,17 @@ class _HomeScreenState extends State<HomeScreen> {
     final cardBorderColor =
         _isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200;
 
-    // ✅ রেস্পন্সিভ লেআউট (Responsive Layout) এর জন্য স্ক্রিনের চওড়া মাপা হচ্ছে
     final screenWidth = MediaQuery.of(context).size.width;
 
-    int crossAxisCount = 2; // ডিফল্ট (ফোনের জন্য)
-    double childAspectRatio =
-        1.35; // কার্ডের উচ্চতা কমানোর জন্য রেট বাড়ানো হয়েছে
+    int crossAxisCount = 2;
+    double childAspectRatio = 1.15;
 
     if (screenWidth >= 900) {
-      crossAxisCount = 4; // ওয়েবসাইটের জন্য ৪ কলাম
-      childAspectRatio = 1.5;
+      crossAxisCount = 4;
+      childAspectRatio = 1.3;
     } else if (screenWidth >= 600) {
-      crossAxisCount = 3; // ট্যাবলেটের জন্য ৩ কলাম
-      childAspectRatio = 1.4;
+      crossAxisCount = 3;
+      childAspectRatio = 1.2;
     }
 
     return Scaffold(
@@ -236,10 +234,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: crossAxisCount, // ✅ রেস্পন্সিভ কলাম
+                  crossAxisCount: crossAxisCount,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
-                  childAspectRatio: childAspectRatio, // ✅ কার্ডের পারফেক্ট সাইজ
+                  childAspectRatio: childAspectRatio,
                   children: [
                     _buildGridCard(
                       title: 'Vocabulary\nভোকাভুলারি',
@@ -604,21 +602,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon,
-                  size: 28, color: iconColor), // আইকনের সাইজ একটু কমানো হয়েছে
-              const SizedBox(height: 8),
-              Text(title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
-                      height: 1.2)),
-            ],
+          padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: 24, color: iconColor),
+                  const SizedBox(height: 4),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                            height: 1.1),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
