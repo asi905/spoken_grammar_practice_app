@@ -91,7 +91,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     }
   }
 
-  // ✅ ফিক্স: Try-catch বসানো হয়েছে যেন লগইন ফেইল হলে অ্যাপ ক্র্যাশ বা ফ্রিজ না হয়
+  // ✅ ফিক্স: Try-catch এবং ওয়েলকাম বোনাস স্ক্রিনে সাথে সাথে আপডেট করার লজিক
   Future<void> _handleGoogleSignIn() async {
     setState(() => isLoading = true);
     try {
@@ -116,6 +116,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
             userName = user.displayName ?? 'Learner';
             profilePicUrl = user.photoURL;
             isLoggedIn = true;
+            totalMcqScore = updatedScore; // 👈 রিলোড ছাড়াই পয়েন্ট আপডেট হবে
+            totalLearnedWords =
+                updatedVocab; // 👈 রিলোড ছাড়াই ভোকাবুলারি আপডেট হবে
           });
         }
       }
@@ -123,9 +126,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
       debugPrint("Login Error: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-                'লগইন বাতিল হয়েছে বা সমস্যা হয়েছে। আবার চেষ্টা করুন।'),
+          const SnackBar(
+            content:
+                Text('লগইন বাতিল হয়েছে বা সমস্যা হয়েছে। আবার চেষ্টা করুন।'),
             backgroundColor: Colors.redAccent,
           ),
         );
