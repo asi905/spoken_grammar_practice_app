@@ -52,7 +52,20 @@ class ScoreboardScreen extends StatelessWidget {
               );
             }
 
-            final users = snapshot.data!.docs;
+            // ✅ ফিক্স: শুধুমাত্র আসল ইউজারদের ফিল্টার করা হলো (যাদের নাম 'Learner' নয়)
+            final users = snapshot.data!.docs.where((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final name = data['name']?.toString().trim() ?? '';
+              // লগইন ছাড়া ইউজারদের নাম 'Learner' থাকে, তাই তাদের বাদ দেওয়া হচ্ছে
+              return name.isNotEmpty && name.toLowerCase() != 'learner';
+            }).toList();
+
+            if (users.isEmpty) {
+              return const Center(
+                child: Text('এখনো কোনো ভেরিফাইড স্কোর নেই!',
+                    style: TextStyle(fontSize: 18, color: Colors.white70)),
+              );
+            }
 
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),

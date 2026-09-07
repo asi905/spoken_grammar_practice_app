@@ -2,8 +2,11 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/practice_item.dart';
 import '../services/tts_service.dart';
+import '../data/progress_service.dart';
 
 class DailyMcqScreen extends StatefulWidget {
   final String title;
@@ -189,12 +192,32 @@ class _DailyMcqScreenState extends State<DailyMcqScreen> {
   Future<void> _showScoreDialog() async {
     final prefs = await SharedPreferences.getInstance();
     int previousScore = prefs.getInt('total_mcq_score') ?? 0;
-    await prefs.setInt('total_mcq_score', previousScore + _score);
+    int newTotalScore = previousScore + _score;
 
-    // পুরো টেস্ট শেষ পর্যন্ত পৌঁছালে তবেই lock সেভ হয় — মাঝপথে বের হয়ে
-    // গেলে lock হবে না, ইউজার আবার ঢুকে সম্পূর্ণ করতে পারবে।
+    // লোকাল স্টোরেজে সেভ করা
+    await prefs.setInt('total_mcq_score', newTotalScore);
+
     if (widget.lockKey != null) {
       await prefs.setBool(widget.lockKey!, true);
+    }
+
+    // ✅ ফিক্স: ইউজার লগইন করা থাকলে তবেই ফায়ারবেসে স্কোর আপডেট হবে
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final progressService = ProgressService();
+        int vocabCount = await progressService.getCompletedCount();
+
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'score': newTotalScore,
+          'vocabCount': vocabCount,
+          'name': user.displayName ?? 'Learner',
+          'photoUrl': user.photoURL ?? '',
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+    } catch (e) {
+      debugPrint("Score sync error: $e");
     }
 
     double percentage = (_score / _mcqQuestions.length) * 100;
