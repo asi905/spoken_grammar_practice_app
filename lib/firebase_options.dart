@@ -54,6 +54,7 @@ class DefaultFirebaseOptions {
     appId: '1:689451026161:android:e4924571a16c8589148b50',
     messagingSenderId: '689451026161',
     projectId: 'speak-practice-app-5eaaa',
+    authDomain: 'speak-practice-app-5eaaa.firebaseapp.com',
     storageBucket: 'speak-practice-app-5eaaa.firebasestorage.app',
   );
 
