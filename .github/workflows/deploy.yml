@@ -1,0 +1,36 @@
+name: Build and Release Flutter APK
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # গিটহাবকে রিলিজ তৈরি করার পারমিশন দেওয়া হলো
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+
+    - name: Install and Build APK
+      run: |
+        flutter pub get
+        flutter build apk --release
+
+    # গিটহাবে 'latest' নামে একটি রিলিজ তৈরি করে সেখানে APK আপলোড করবে
+    - name: Upload APK to GitHub Release
+      uses: ncipollo/release-action@v1
+      with:
+        allowUpdates: true
+        tag: "latest"
+        name: "Latest Update"
+        body: "এটি অ্যাপের সবচেয়ে নতুন ভার্সন।"
+        artifacts: "build/app/outputs/flutter-apk/app-release.apk"
+        token: ${{ secrets.GITHUB_TOKEN }}

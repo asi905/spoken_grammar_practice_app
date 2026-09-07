@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "689451026161",
+    "project_id": "speak-practice-app-5eaaa",
+    "storage_bucket": "speak-practice-app-5eaaa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:689451026161:android:e4924571a16c8589148b50",
+        "android_client_info": {
+          "package_name": "com.example.speak_practice"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "689451026161-j85ujbbpqp52u5uiqn2p2535hnv1i5od.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.speak_practice",
+            "certificate_hash": "e2c3354f1ada3a91192d2156389bd844fe34901f"
+          }
+        },
+        {
+          "client_id": "689451026161-ffm568eejedb5rfs2q98tuchdu1ksbbr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgUybiii-9BemDZmEUCuB71ZZ9LVwlGhQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "689451026161-ffm568eejedb5rfs2q98tuchdu1ksbbr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "689451026161-ikp31nbpetjumh1stsjg8sdj1erhkqhj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.speakPractice"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:689451026161:android:8f5ad1d949e2e43e148b50",
+        "android_client_info": {
+          "package_name": "com.example.spoken_grammar_practice"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "689451026161-5f2bgq3jv3t5442jl70p4823crjta7dp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.spoken_grammar_practice",
+            "certificate_hash": "e2c3354f1ada3a91192d2156389bd844fe34901f"
+          }
+        },
+        {
+          "client_id": "689451026161-ffm568eejedb5rfs2q98tuchdu1ksbbr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgUybiii-9BemDZmEUCuB71ZZ9LVwlGhQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "689451026161-ffm568eejedb5rfs2q98tuchdu1ksbbr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "689451026161-ikp31nbpetjumh1stsjg8sdj1erhkqhj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.speakPractice"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,47 @@
+name: spoken_grammar_practice
+description: English Speaking & Grammar Practice App (MVP).
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  # প্রোগ্রেস ট্র্যাকিং এর জন্য লোকাল স্টোরেজ
+  shared_preferences: ^2.2.2
+  # শব্দ শোনার (Text-to-Speech) জন্য
+  flutter_tts: ^4.0.2
+  # কথা বলে টেক্সট করার (Speech-to-Text) জন্য
+  speech_to_text: ^7.0.0
+  # মাইক্রোফোন পারমিশন চাওয়ার জন্য
+  permission_handler: ^11.3.1
+  # ইন্টারনেট থেকে ডেটা আনার জন্য (Unlimited Vocabulary ফিচার)
+  http: ^1.2.0
+  image_picker: ^1.2.3
+  firebase_core: ^4.14.0
+  cloud_firestore: ^6.9.0
+  firebase_auth: ^6.6.1
+  # স্থিতিশীল গুগল সাইন-ইন প্যাকেজ
+  google_sign_in: ^6.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/roles.json
+    - assets/app_icon.png
+    - assets/dictionary/bengali_dictionary.json
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/app_icon.png"
+  min_sdk_android: 21
