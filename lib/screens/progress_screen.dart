@@ -37,7 +37,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     });
   }
 
-  // ✅ ফিক্স: এখন স্কোরের পাশাপাশি Vocab Count-ও ফায়ারবেসে সেভ হবে
+  // ✅ স্কোরের পাশাপাশি Vocab Count-ও ফায়ারবেসে সেভ হবে
   Future<void> _syncScoreToFirebase(int mcqScore, int vocabCount) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
@@ -46,11 +46,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
           'name': user.displayName ?? 'Learner',
           'photoUrl': user.photoURL ?? '',
           'score': mcqScore,
-          'vocabCount': vocabCount, // 👈 নতুন ডেটা
+          'vocabCount': vocabCount,
           'updatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
       }
-    } catch (e) {}
+    } catch (e) {
+      debugPrint("Error syncing score: $e");
+    }
   }
 
   Future<void> _loadProgressData() async {
@@ -72,46 +74,67 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final progressService = ProgressService();
     int learnedWords = await progressService.getCompletedCount();
 
-    setState(() {
-      userName = name;
-      totalMcqScore = score;
-      totalLearnedWords = learnedWords;
-      profilePicBase64 = savedPicBase64;
-      profilePicUrl = savedPicUrl;
-      isLoggedIn = currentUser != null;
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        userName = name;
+        totalMcqScore = score;
+        totalLearnedWords = learnedWords;
+        profilePicBase64 = savedPicBase64;
+        profilePicUrl = savedPicUrl;
+        isLoggedIn = currentUser != null;
+        isLoading = false;
+      });
+    }
 
     if (currentUser != null) {
       _syncScoreToFirebase(score, learnedWords);
     }
   }
 
+  // ✅ ফিক্স: Try-catch বসানো হয়েছে যেন লগইন ফেইল হলে অ্যাপ ক্র্যাশ বা ফ্রিজ না হয়
   Future<void> _handleGoogleSignIn() async {
     setState(() => isLoading = true);
-    final user = await AuthService.signInWithGoogle();
+    try {
+      final user = await AuthService.signInWithGoogle();
 
-    if (user != null) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('student_name_v2', user.displayName ?? 'Learner');
-      if (user.photoURL != null) {
-        await prefs.setString('user_profile_pic_url', user.photoURL!);
+      if (user != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('student_name_v2', user.displayName ?? 'Learner');
+        if (user.photoURL != null) {
+          await prefs.setString('user_profile_pic_url', user.photoURL!);
+        }
+
+        await WelcomeBonusService.awardIfFirstTime();
+        final updatedScore = prefs.getInt('total_mcq_score') ?? 0;
+        final progressService = ProgressService();
+        final updatedVocab = await progressService.getCompletedCount();
+
+        await _syncScoreToFirebase(updatedScore, updatedVocab);
+
+        if (mounted) {
+          setState(() {
+            userName = user.displayName ?? 'Learner';
+            profilePicUrl = user.photoURL;
+            isLoggedIn = true;
+          });
+        }
       }
-
-      await WelcomeBonusService.awardIfFirstTime();
-      final updatedScore = prefs.getInt('total_mcq_score') ?? 0;
-      final progressService = ProgressService();
-      final updatedVocab = await progressService.getCompletedCount();
-
-      await _syncScoreToFirebase(updatedScore, updatedVocab);
-
-      setState(() {
-        userName = user.displayName ?? 'Learner';
-        profilePicUrl = user.photoURL;
-        isLoggedIn = true;
-      });
+    } catch (e) {
+      debugPrint("Login Error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+                'লগইন বাতিল হয়েছে বা সমস্যা হয়েছে। আবার চেষ্টা করুন।'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
-    setState(() => isLoading = false);
   }
 
   Future<void> _handleLogout() async {
@@ -120,11 +143,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
     await prefs.remove('user_profile_pic_url');
     await prefs.remove('student_name_v2');
 
-    setState(() {
-      userName = "Learner";
-      profilePicUrl = null;
-      isLoggedIn = false;
-    });
+    if (mounted) {
+      setState(() {
+        userName = "Learner";
+        profilePicUrl = null;
+        isLoggedIn = false;
+      });
+    }
   }
 
   ImageProvider? _getProfileImage() {
@@ -289,8 +314,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 offset: const Offset(0, 4))
           ]),
       child: Row(
-        mainAxisAlignment:
-            isFullWidth ? MainAxisAlignment.start : MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           CircleAvatar(
               backgroundColor: color.withOpacity(0.1),
